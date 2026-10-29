@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Laporan Keuangan - Brothersart925 (Ziva School)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+    <!-- Header Navigation -->
+    <header class="bg-gradient-to-r from-orange-600 to-amber-500 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-xl text-orange-600 font-bold shadow">
+                    <i class="fa-solid me-1 fa-store text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg sm:text-xl tracking-tight">Brothersart925</h1>
+                    <p class="text-xs text-orange-100">Reseller Resmi Ziva School • Owner: Iyan</p>
+                </div>
+            </div>
+            <div class="hidden sm:flex items-center space-x-2 text-xs bg-orange-700/40 backdrop-blur-md px-3 py-1.5 rounded-lg border border-orange-400/30">
+                <i class="fa-solid fa-calculator text-amber-300"></i>
+                <span>Estimasi Pencairan Shopee: <strong>~80.24%</strong></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8 flex-grow">
+
+        <!-- Filter Period & Weekly/Monthly Summary Option -->
+        <section class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-2 text-slate-800 font-bold text-sm">
+                <i class="fa-solid fa-filter text-orange-500"></i>
+                <span>Filter Rekapan Periode:</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="setPeriodFilter('all')" id="filterBtnAll" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-orange-500 text-white transition">Semua</button>
+                <button onclick="setPeriodFilter('today')" id="filterBtnToday" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Hari Ini</button>
+                <button onclick="setPeriodFilter('week')" id="filterBtnWeek" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Minggu Ini</button>
+                <button onclick="setPeriodFilter('month')" id="filterBtnMonth" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition">Bulan Ini</button>
+                
+                <div class="flex items-center gap-1 bg-slate-50 p-1 rounded-xl border border-slate-200 text-xs">
+                    <input type="date" id="filterStartDate" onchange="setCustomPeriod()" class="bg-transparent text-xs p-1 outline-none text-slate-600">
+                    <span class="text-slate-400">-</span>
+                    <input type="date" id="filterEndDate" onchange="setCustomPeriod()" class="bg-transparent text-xs p-1 outline-none text-slate-600">
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Overview Stats Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Total Sales -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Penjualan</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="statTotalOmset">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-1"><span id="statTotalUnit">0</span> pcs produk terjual</p>
+                </div>
+                <div class="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <i class="fa-solid fa-bag-shopping text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Total Shopee Payout -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Pencairan Shopee</p>
+                    <h3 class="text-2xl font-bold text-orange-600 mt-1" id="statTotalPencairan">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Setelah pot. Shopee (~19.76%)</p>
+                </div>
+                <div class="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                    <i class="fa-solid fa-wallet text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Total Setoran Owner -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-slate-500 uppercase tracking-wider">Wajib Setor Owner (Iyan)</p>
+                    <h3 class="text-2xl font-bold text-slate-700 mt-1" id="statTotalSetoran">Rp 0</h3>
+                    <p class="text-xs text-slate-500 mt-1">Modal HPP Supplier</p>
+                </div>
+                <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                    <i class="fa-solid fa-hand-holding-dollar text-2xl"></i>
+                </div>
+            </div>
+
+            <!-- Total Net Profit -->
+            <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-5 rounded-2xl shadow-md flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-emerald-100 uppercase tracking-wider">Keuntungan Bersih</p>
+                    <h3 class="text-2xl font-bold text-white mt-1" id="statTotalProfit">Rp 0</h3>
+                    <p class="text-xs text-emerald-200 mt-1">Laba Toko Brothersart925</p>
+                </div>
+                <div class="p-3 bg-white/10 text-emerald-100 rounded-xl backdrop-blur-sm">
+                    <i class="fa-solid fa-chart-line text-2xl"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- MANAJEMEN PENCAIRAN SALDO & SETORAN OWNER -->
+        <section class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-6">
+            <div class="border-b border-slate-100 pb-3 flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-money-bill-transfer text-orange-500"></i> Rekap Penarikan Saldo & Setoran Owner
+                    </h2>
+                    <p class="text-xs text-slate-500">Pantau sisa saldo di Shopee dan status setoran ke Mas Iyan</p>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full">Real-time Balance</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Input Saldo Ditarik & Setoran -->
+                <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Total Saldo Shopee Yang Sudah Diambil (Ditarik)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">Rp</span>
+                            <input type="number" id="inputSaldoDitarik" min="0" placeholder="0" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Total Uang Yang Sudah Disetor Ke Owner (Iyan)</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-xs text-slate-400 font-semibold">Rp</span>
+                            <input type="number" id="inputSudahSetor" min="0" placeholder="0" class="w-full pl-9 pr-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <button onclick="saveFinanceRecords()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-semibold text-xs rounded-xl shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-floppy-disk"></i> Simpan Catatan Penarikan & Setoran
+                    </button>
+                </div>
+
+                <!-- Live Status Cards -->
+                <div class="grid grid-cols-1 gap-3 text-xs">
+                    <div class="p-4 bg-amber-50 rounded-xl border border-amber-200/80 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-amber-800">Sisa Saldo Shopee Belum Ditarik</p>
+                            <p class="text-xs text-amber-600">Total Pencairan - Saldo Ditarik</p>
+                        </div>
+                        <span class="text-base font-bold text-amber-900" id="cardSisaSaldoShopee">Rp 0</span>
+                    </div>
+
+                    <div class="p-4 bg-purple-50 rounded-xl border border-purple-200/80 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-purple-800">Kurangnya / Sisa Setoran ke Iyan</p>
+                            <p class="text-xs text-purple-600">Wajib Setor - Sudah Disetor</p>
+                        </div>
+                        <span class="text-base font-bold text-purple-900" id="cardKurangSetor">Rp 0</span>
+                    </div>
+
+                    <div class="p-4 bg-teal-50 rounded-xl border border-teal-200/80 flex items-center justify-between">
+                        <div>
+                            <p class="font-medium text-teal-800">Kas Profit Reseller di Tangan</p>
+                            <p class="text-xs text-teal-600">Saldo Ditarik - Total Sudah Disetor</p>
+                        </div>
+                        <span class="text-base font-bold text-teal-900" id="cardProfitDiTangan">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Interactive Section: Quick Calculator & Order Input -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <!-- Input Calculator Card -->
+            <div class="lg:col-span-5 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-5">
+                <div class="border-b border-slate-100 pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-calculator text-orange-500"></i> Hitung & Catat Pesanan
+                        </h2>
+                        <p class="text-xs text-slate-500">Pilih varian untuk kalkulasi profit instan</p>
+                    </div>
+                    <span class="text-xs font-semibold px-2.5 py-1 bg-amber-100 text-amber-800 rounded-full">Ziva School</span>
+                </div>
+
+                <form id="calcForm" class="space-y-4">
+                    <!-- Date Input -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Transaksi</label>
+                        <input type="date" id="inputTanggal" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition" required>
+                    </div>
+
+                    <!-- Jenis Rok -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Model Rok</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="jenisRok" value="span" checked class="peer hidden">
+                                <div class="p-3 text-center rounded-xl border border-slate-200 text-sm font-semibold peer-checked:bg-orange-50 peer-checked:border-orange-500 peer-checked:text-orange-600 transition">
+                                    Rok Span
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="jenisRok" value="rempel" class="peer hidden">
+                                <div class="p-3 text-center rounded-xl border border-slate-200 text-sm font-semibold peer-checked:bg-orange-50 peer-checked:border-orange-500 peer-checked:text-orange-600 transition">
+                                    Rok Rempel
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Ukuran Rok -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Ukuran / Size</label>
+                        <select id="selectUkuran" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition">
+                            <option value="S-XL">Standar (S, M, L, XL)</option>
+                            <option value="XXL">XXL (+2.000)</option>
+                            <option value="L4">L4 (+4.000)</option>
+                            <option value="L5">L5 (+6.000)</option>
+                        </select>
+                    </div>
+
+                    <!-- Jumlah Pcs -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah (Qty)</label>
+                            <input type="number" id="inputQty" min="1" value="1" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition" required>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan / No. Resi (Opsional)</label>
+                            <input type="text" id="inputCatatan" placeholder="Contoh: Pesanan A1" class="w-full px-3 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-sm transition">
+                        </div>
+                    </div>
+
+                    <!-- Live Dynamic Breakdown -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2 text-xs">
+                        <div class="flex justify-between text-slate-600">
+                            <span>Harga Jual Shopee (per pcs):</span>
+                            <span class="font-semibold text-slate-800" id="calcHargaJualPcs">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Pencairan Shopee (per pcs):</span>
+                            <span class="font-semibold text-orange-600" id="calcPencairanPcs">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-600">
+                            <span>Modal Setoran Iyan (per pcs):</span>
+                            <span class="font-semibold text-purple-600" id="calcModalPcs">Rp 0</span>
+                        </div>
+                        <div class="border-t border-slate-200 my-1 pt-1.5 flex justify-between text-sm font-bold">
+                            <span class="text-slate-700">Profit Bersih Kamu (Total):</span>
+                            <span class="text-emerald-600" id="calcTotalProfitItem">Rp 0</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Simpan Transaksi Ke Laporan
+                    </button>
+                </form>
+            </div>
+
+            <!-- Quick Master Pricing Table Reference Card -->
+            <div class="lg:col-span-7 bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-table text-orange-500"></i> Acuan Master Harga & Margin
+                        </h2>
+                        <p class="text-xs text-slate-500">Rincian rasio pencairan Shopee (~80.24%) dan setoran owner</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-100 text-slate-700 uppercase font-semibold">
+                            <tr>
+                                <th class="p-2.5 rounded-l-lg">Varian Produk</th>
+                                <th class="p-2.5">Harga Jual Shopee</th>
+                                <th class="p-2.5">Pencairan Shopee (~80.24%)</th>
+                                <th class="p-2.5">Setoran Owner</th>
+                                <th class="p-2.5 rounded-r-lg text-right">Profit / Pcs</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterPricingTableBody" class="divide-y divide-slate-100 text-slate-600">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Transaction History Table Section -->
+        <section class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-receipt text-orange-500"></i> Riwayat Transaksi Penjualan
+                    </h2>
+                    <p class="text-xs text-slate-500">Daftar transaksi harian yang tersimpan</p>
+                </div>
+
+                <!-- Controls & Actions -->
+                <div class="flex flex-wrap items-center gap-2 no-print">
+                    <button onclick="exportToCSV()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-xl border border-emerald-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-file-excel"></i> Export Excel/CSV
+                    </button>
+                    <button onclick="window.print()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Cetak Laporan
+                    </button>
+                    <button onclick="clearAllData()" class="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded-xl border border-rose-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can"></i> Hapus Semua
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50 text-slate-700 uppercase font-semibold">
+                        <tr>
+                            <th class="p-3">Tanggal</th>
+                            <th class="p-3">Produk & Size</th>
+                            <th class="p-3 text-center">Qty</th>
+                            <th class="p-3">Total Omset Shopee</th>
+                            <th class="p-3">Pencairan Shopee</th>
+                            <th class="p-3">Setoran ke Iyan</th>
+                            <th class="p-3">Profit Bersih</th>
+                            <th class="p-3">Catatan</th>
+                            <th class="p-3 text-center no-print">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody" class="divide-y divide-slate-100 text-slate-600">
+                        <!-- Populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="emptyState" class="py-12 text-center text-slate-400 hidden">
+                <i class="fa-regular fa-folder-open text-4xl mb-2"></i>
+                <p class="text-sm">Belum ada data transaksi yang dicatat.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200/80 py-4 text-center text-xs text-slate-500 no-print">
+        <p>© 2026 Brothersart925 • Sistem Laporan Reseller Ziva School</p>
+    </footer>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-base" id="toastIcon"></i>
+        <span id="toastMessage">Pesan Notifikasi</span>
+    </div>
+
+    <!-- Application Script Logic -->
+    <script>
+        // Constants & Margin Calculations
+        const SHOPEE_PAYOUT_RATIO = 49347 / 61500;
+
+        // Base Rules Pricing Configuration
+        const PRODUCT_MASTER = {
+            span: {
+                name: 'Rok Span',
+                baseModal: 45000,
+                sizes: {
+                    'S-XL': { extraModal: 0, sellPrice: 61500 },
+                    'XXL':  { extraModal: 2000, sellPrice: 65500 },
+                    'L4':   { extraModal: 4000, sellPrice: 68000 },
+                    'L5':   { extraModal: 6000, sellPrice: 70500 }
+                }
+            },
+            rempel: {
+                name: 'Rok Rempel',
+                baseModal: 47000,
+                sizes: {
+                    'S-XL': { extraModal: 0, sellPrice: 63500 },
+                    'XXL':  { extraModal: 2000, sellPrice: 67500 },
+                    'L4':   { extraModal: 4000, sellPrice: 70000 },
+                    'L5':   { extraModal: 6000, sellPrice: 72500 }
+                }
+            }
+        };
+
+        // LocalStorage Keys
+        const STORAGE_KEY = 'brothersart925_transactions';
+        const STORAGE_FINANCE_KEY = 'brothersart925_finance_records';
+
+        // State Variables
+        let transactions = [];
+        let financeRecord = { saldoDitarik: 0, sudahSetor: 0 };
+        let activeFilter = 'all'; // 'all', 'today', 'week', 'month', 'custom'
+
+        // Helper: Format Rupiah
+        function formatRp(val) {
+            return 'Rp ' + Math.round(val).toLocaleString('id-ID');
+        }
+
+        // Initialize App on DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default date to today
+            document.getElementById('inputTanggal').valueAsDate = new Date();
+
+            // Load LocalStorage
+            loadTransactions();
+            loadFinanceRecords();
+
+            // Render Master Pricing Reference Table
+            renderMasterTable();
+
+            // Attach Form & Input Event Listeners
+            document.getElementById('calcForm').addEventListener('submit', handleAddTransaction);
+            document.querySelectorAll('input[name="jenisRok"]').forEach(el => el.addEventListener('change', updateCalcPreview));
+            document.getElementById('selectUkuran').addEventListener('change', updateCalcPreview);
+            document.getElementById('inputQty').addEventListener('input', updateCalcPreview);
+
+            // Initial calculation update
+            updateCalcPreview();
+        });
+
+        // Save & Load Financial Status
+        function saveFinanceRecords() {
+            const saldoDitarik = parseFloat(document.getElementById('inputSaldoDitarik').value) || 0;
+            const sudahSetor = parseFloat(document.getElementById('inputSudahSetor').value) || 0;
+
+            financeRecord = { saldoDitarik, sudahSetor };
+            localStorage.setItem(STORAGE_FINANCE_KEY, JSON.stringify(financeRecord));
+            updateOverviewStats();
+            showToast('Catatan saldo & setoran tersimpan!');
+        }
+
+        function loadFinanceRecords() {
+            const stored = localStorage.getItem(STORAGE_FINANCE_KEY);
+            if (stored) {
+                try {
+                    financeRecord = JSON.parse(stored);
+                    document.getElementById('inputSaldoDitarik').value = financeRecord.saldoDitarik || '';
+                    document.getElementById('inputSudahSetor').value = financeRecord.sudahSetor || '';
+                } catch (e) {
+                    financeRecord = { saldoDitarik: 0, sudahSetor: 0 };
+                }
+            }
+        }
+
+        // Period Filtering Logic
+        function setPeriodFilter(filterType) {
+            activeFilter = filterType;
+            
+            // Reset button styles
+            ['All', 'Today', 'Week', 'Month'].forEach(f => {
+                const btn = document.getElementById(`filterBtn${f}`);
+                if (btn) {
+                    btn.className = "px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+                }
+            });
+
+            if (filterType !== 'custom') {
+                document.getElementById('filterStartDate').value = '';
+                document.getElementById('filterEndDate').value = '';
+                const activeBtn = document.getElementById(`filterBtn${filterType.charAt(0).toUpperCase() + filterType.slice(1)}`);
+                if (activeBtn) {
+                    activeBtn.className = "px-3 py-1.5 text-xs font-semibold rounded-xl bg-orange-500 text-white transition";
+                }
+            }
+
+            renderTransactions();
+            updateOverviewStats();
+        }
+
+        function setCustomPeriod() {
+            const start = document.getElementById('filterStartDate').value;
+            const end = document.getElementById('filterEndDate').value;
+            if (start || end) {
+                activeFilter = 'custom';
+                ['All', 'Today', 'Week', 'Month'].forEach(f => {
+                    const btn = document.getElementById(`filterBtn${f}`);
+                    if (btn) {
+                        btn.className = "px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition";
+                    }
+                });
+                renderTransactions();
+                updateOverviewStats();
+            }
+        }
+
+        function getFilteredTransactions() {
+            const now = new Date();
+            return transactions.filter(t => {
+                if (!t.tanggal) return true;
+                const txDate = new Date(t.tanggal);
+
+                if (activeFilter === 'today') {
+                    return txDate.toDateString() === now.toDateString();
+                } else if (activeFilter === 'week') {
+                    const startOfWeek = new Date(now);
+                    startOfWeek.setDate(now.getDate() - now.getDay());
+                    startOfWeek.setHours(0,0,0,0);
+                    return txDate >= startOfWeek;
+                } else if (activeFilter === 'month') {
+                    return txDate.getMonth() === now.getMonth() && txDate.getFullYear() === now.getFullYear();
+                } else if (activeFilter === 'custom') {
+                    const start = document.getElementById('filterStartDate').value;
+                    const end = document.getElementById('filterEndDate').value;
+                    let valid = true;
+                    if (start) valid = valid && txDate >= new Date(start);
+                    if (end) {
+                        const endDate = new Date(end);
+                        endDate.setHours(23,59,59,999);
+                        valid = valid && txDate <= endDate;
+                    }
+                    return valid;
+                }
+                return true; // 'all'
+            });
+        }
+
+        // Compute Single Item Details
+        function calculateItemData(jenis, size, qty) {
+            const modelConfig = PRODUCT_MASTER[jenis];
+            const sizeConfig = modelConfig.sizes[size];
+
+            const modalPerPcs = modelConfig.baseModal + sizeConfig.extraModal;
+            const sellPricePerPcs = sizeConfig.sellPrice;
+            const shopeePayoutPerPcs = Math.round(sellPricePerPcs * SHOPEE_PAYOUT_RATIO);
+            const profitPerPcs = shopeePayoutPerPcs - modalPerPcs;
+
+            return {
+                modelName: modelConfig.name,
+                sizeLabel: size,
+                qty: qty,
+                sellPricePcs: sellPricePerPcs,
+                payoutPcs: shopeePayoutPerPcs,
+                modalPcs: modalPerPcs,
+                profitPcs: profitPerPcs,
+                totalOmset: sellPricePerPcs * qty,
+                totalPayout: shopeePayoutPerPcs * qty,
+                totalModal: modalPerPcs * qty,
+                totalProfit: profitPerPcs * qty
+            };
+        }
+
+        // Dynamic Form Live Preview Update
+        function updateCalcPreview() {
+            const jenis = document.querySelector('input[name="jenisRok"]:checked').value;
+            const size = document.getElementById('selectUkuran').value;
+            const qty = parseInt(document.getElementById('inputQty').value) || 1;
+
+            const calc = calculateItemData(jenis, size, qty);
+
+            document.getElementById('calcHargaJualPcs').innerText = formatRp(calc.sellPricePcs);
+            document.getElementById('calcPencairanPcs').innerText = formatRp(calc.payoutPcs);
+            document.getElementById('calcModalPcs').innerText = formatRp(calc.modalPcs);
+            document.getElementById('calcTotalProfitItem').innerText = formatRp(calc.totalProfit);
+        }
+
+        // Render Master Pricing Reference Table
+        function renderMasterTable() {
+            const tbody = document.getElementById('masterPricingTableBody');
+            tbody.innerHTML = '';
+
+            ['span', 'rempel'].forEach(jenis => {
+                Object.keys(PRODUCT_MASTER[jenis].sizes).forEach(size => {
+                    const calc = calculateItemData(jenis, size, 1);
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-slate-50 transition';
+                    tr.innerHTML = `
+                        <td class="p-2.5 font-medium text-slate-800">${calc.modelName} (${size})</td>
+                        <td class="p-2.5 font-medium">${formatRp(calc.sellPricePcs)}</td>
+                        <td class="p-2.5 text-orange-600 font-semibold">${formatRp(calc.payoutPcs)}</td>
+                        <td class="p-2.5 text-purple-600 font-semibold">${formatRp(calc.modalPcs)}</td>
+                        <td class="p-2.5 text-right font-bold text-emerald-600">${formatRp(calc.profitPcs)}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            });
+        }
+
+        // Handle Form Submission
+        function handleAddTransaction(e) {
+            e.preventDefault();
+
+            const tanggal = document.getElementById('inputTanggal').value;
+            const jenis = document.querySelector('input[name="jenisRok"]:checked').value;
+            const size = document.getElementById('selectUkuran').value;
+            const qty = parseInt(document.getElementById('inputQty').value) || 1;
+            const catatan = document.getElementById('inputCatatan').value.trim();
+
+            const calc = calculateItemData(jenis, size, qty);
+
+            const newTx = {
+                id: Date.now(),
+                tanggal,
+                jenis,
+                modelName: calc.modelName,
+                size,
+                qty,
+                omset: calc.totalOmset,
+                payout: calc.totalPayout,
+                modal: calc.totalModal,
+                profit: calc.totalProfit,
+                catatan: catatan || '-'
+            };
+
+            transactions.unshift(newTx);
+            saveTransactions();
+            renderTransactions();
+            updateOverviewStats();
+
+            // Reset form note
+            document.getElementById('inputCatatan').value = '';
+            showToast('Transaksi berhasil ditambahkan!');
+        }
+
+        // Save to LocalStorage
+        function saveTransactions() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        }
+
+        // Load from LocalStorage
+        function loadTransactions() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    transactions = JSON.parse(stored);
+                } catch (e) {
+                    transactions = [];
+                }
+            }
+            renderTransactions();
+            updateOverviewStats();
+        }
+
+        // Render Transaction List Table
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionTableBody');
+            const emptyState = document.getElementById('emptyState');
+
+            tbody.innerHTML = '';
+            const filtered = getFilteredTransactions();
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(tx => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50 transition text-xs';
+                tr.innerHTML = `
+                    <td class="p-3 font-medium text-slate-700">${formatDate(tx.tanggal)}</td>
+                    <td class="p-3 font-semibold text-slate-800">${tx.modelName} <span class="text-slate-500 font-normal">(${tx.size})</span></td>
+                    <td class="p-3 text-center font-bold text-slate-700">${tx.qty}</td>
+                    <td class="p-3 text-slate-700 font-medium">${formatRp(tx.omset)}</td>
+                    <td class="p-3 text-orange-600 font-semibold">${formatRp(tx.payout)}</td>
+                    <td class="p-3 text-purple-600 font-semibold">${formatRp(tx.modal)}</td>
+                    <td class="p-3 text-emerald-600 font-bold">${formatRp(tx.profit)}</td>
+                    <td class="p-3 text-slate-500 italic">${escapeHtml(tx.catatan)}</td>
+                    <td class="p-3 text-center no-print">
+                        <button onclick="deleteTransaction(${tx.id})" class="text-rose-500 hover:text-rose-700 p-1 rounded transition" title="Hapus">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Update Overview & Settlement Status Cards
+        function updateOverviewStats() {
+            const filtered = getFilteredTransactions();
+
+            const totalOmset = filtered.reduce((sum, t) => sum + t.omset, 0);
+            const totalPayout = filtered.reduce((sum, t) => sum + t.payout, 0);
+            const totalModal = filtered.reduce((sum, t) => sum + t.modal, 0);
+            const totalProfit = filtered.reduce((sum, t) => sum + t.profit, 0);
+            const totalQty = filtered.reduce((sum, t) => sum + t.qty, 0);
+
+            // Top Header Stats
+            document.getElementById('statTotalOmset').innerText = formatRp(totalOmset);
+            document.getElementById('statTotalPencairan').innerText = formatRp(totalPayout);
+            document.getElementById('statTotalSetoran').innerText = formatRp(totalModal);
+            document.getElementById('statTotalProfit').innerText = formatRp(totalProfit);
+            document.getElementById('statTotalUnit').innerText = totalQty;
+
+            // Finance Settlement Balance Cards
+            const sisaSaldoShopee = totalPayout - financeRecord.saldoDitarik;
+            const kurangSetor = totalModal - financeRecord.sudahSetor;
+            const profitDiTangan = financeRecord.saldoDitarik - financeRecord.sudahSetor;
+
+            document.getElementById('cardSisaSaldoShopee').innerText = formatRp(sisaSaldoShopee);
+            document.getElementById('cardKurangSetor').innerText = formatRp(kurangSetor);
+            document.getElementById('cardProfitDiTangan').innerText = formatRp(profitDiTangan);
+        }
+
+        // Delete Single Transaction
+        function deleteTransaction(id) {
+            if (confirm('Apakah Anda yakin ingin menghapus transaksi ini?')) {
+                transactions = transactions.filter(t => t.id !== id);
+                saveTransactions();
+                renderTransactions();
+                updateOverviewStats();
+                showToast('Transaksi dihapus.');
+            }
+        }
+
+        // Clear All Transactions
+        function clearAllData() {
+            if (transactions.length === 0) return;
+            if (confirm('Apakah Anda yakin ingin menghapus SELURUH riwayat transaksi?')) {
+                transactions = [];
+                saveTransactions();
+                renderTransactions();
+                updateOverviewStats();
+                showToast('Semua data berhasil dibersihkan.');
+            }
+        }
+
+        // Export Data to CSV
+        function exportToCSV() {
+            const filtered = getFilteredTransactions();
+            if (filtered.length === 0) {
+                showToast('Tidak ada data untuk diexport.');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Tanggal,Model,Ukuran,Qty,Total Omset,Pencairan Shopee,Setoran Owner,Profit Bersih,Catatan\n";
+
+            filtered.forEach(t => {
+                csvContent += `"${t.tanggal}","${t.modelName}","${t.size}",${t.qty},${t.omset},${t.payout},${t.modal},${t.profit},"${t.catatan}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `laporan_keuangan_brothersart925_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('Laporan CSV berhasil diunduh!');
+        }
+
+        // Show Toast Notification
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // Format Date to ID
+        function formatDate(str) {
+            if (!str) return '-';
+            const parts = str.split('-');
+            if (parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            return str;
+        }
+
+        // Escape HTML Utility
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>
